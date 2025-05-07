@@ -7,6 +7,14 @@ if (!isset($_SESSION['email'])) {
     exit();
 }
 
+$sender_email = $_SESSION['email'];
+$receiver_email = $_POST['receiver_email'] ?? '';
+$message = $_POST['message'] ?? '';
+$isSecret = isset($_POST['secret']);
+$cipher = $_POST['cipher'] ?? '';
+$key = $_POST['key'] ?? '';
+$secret_message = $_POST['secret_message'] ?? '';
+
 function autokeyEncrypt($plaintext, $key) {
     $plaintext = strtoupper(preg_replace("/[^A-Z]/", "", $plaintext));
     $key = strtoupper(preg_replace("/[^A-Z]/", "", $key));
@@ -29,7 +37,7 @@ function playfairEncrypt($plaintext, $key) {
     $plaintext = strtoupper(preg_replace("/[^A-Z]/", "", $plaintext));
     $plaintext = str_replace("J", "I", $plaintext);
 
-    // Build 5x5 matrix
+    // Build matrix
     $matrix = [];
     $used = [];
     $combined = $key . "ABCDEFGHIKLMNOPQRSTUVWXYZ";
@@ -43,7 +51,15 @@ function playfairEncrypt($plaintext, $key) {
 
     $grid = array_chunk($matrix, 5);
 
-    // Prepare plaintext into digraphs
+    function getPos($grid, $char) {
+        for ($i = 0; $i < 5; $i++) {
+            for ($j = 0; $j < 5; $j++) {
+                if ($grid[$i][$j] === $char) return [$i, $j];
+            }
+        }
+        return [0, 0];
+    }
+
     $pairs = [];
     for ($i = 0; $i < strlen($plaintext); $i += 2) {
         $a = $plaintext[$i];
@@ -56,7 +72,6 @@ function playfairEncrypt($plaintext, $key) {
     }
 
     $ciphertext = "";
-
     foreach ($pairs as [$a, $b]) {
         [$ra, $ca] = getPos($grid, $a);
         [$rb, $cb] = getPos($grid, $b);
@@ -76,48 +91,23 @@ function playfairEncrypt($plaintext, $key) {
     return $ciphertext;
 }
 
-function getPos($grid, $char) {
-    for ($row = 0; $row < 5; $row++) {
-        for ($col = 0; $col < 5; $col++) {
-            if ($grid[$row][$col] == $char) {
-                return [$row, $col];
-            }
-        }
-    }
-    return [0, 0];
-}
-
-$sender = $_SESSION['email'];
-$receiver = $_POST['receiver_email'];
-$timestamp = date('Y-m-d H:i:s');
-
-if (isset($_POST['secret'])) {
-    $originalMessage = $_POST['secret_message'];
-    $cipher = $_POST['cipher'];
-    $key = $_POST['key'];
-
+if ($isSecret) {
     if ($cipher === "autokey") {
-        $encrypted = autokeyEncrypt($originalMessage, $key);
+        $encrypted = autokeyEncrypt($secret_message, $key);
     } elseif ($cipher === "playfair") {
-        $encrypted = playfairEncrypt($originalMessage, $key);
+        $encrypted = playfairEncrypt($secret_message, $key);
     } else {
-        die("Unsupported cipher selected.");
+        die("Invalid cipher selected.");
     }
-
     $finalMessage = "[SECRET]" . $encrypted;
 } else {
-    $finalMessage = $_POST['message'];
+    $finalMessage = $message;
 }
 
-$stmt = $mysqli->prepare("INSERT INTO messages (sender_email, receiver_email, message, timestamp) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $sender, $receiver, $finalMessage, $timestamp);
-
-if ($stmt->execute()) {
-    header("Location: home.php?user=" . urlencode($receiver));
-} else {
-    echo "Error sending message: " . $stmt->error;
-}
-
+$stmt = $mysqli->prepare("INSERT INTO messages (sender_email, receiver_email, message, timestamp) VALUES (?, ?, ?, NOW())");
+$stmt->bind_param("sss", $sender_email, $receiver_email, $finalMessage);
+$stmt->execute();
 $stmt->close();
-$mysqli->close();
-?>
+
+header("Location: home.php?user=" . urlencode($receiver_email));
+exit();
