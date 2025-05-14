@@ -1,5 +1,6 @@
 # Encrypted Chatting System
 Live link: ecs09.netlify.app
+
 This is a simple web based chatting application for Computer and Cyber Security course to demonstrate some ciphering algorithms.
 In this project, We can register new users using gmail and password, login providing gmail address and password. Then in the home page, it shows all the registered users.
 We have select a user to start a conversation. Then we can send messages to different users. The messages are stored and displayed from a database table.
