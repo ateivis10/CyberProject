@@ -1,5 +1,7 @@
 # Encrypted Chatting System
 Live link: ecs09.netlify.app
+N.B. [This a php project, which is fully functional, this repository contains all the functional files on php. But to showcase this project with a livelink, I converted the project
+to Js with the same functionalities. To see the functionalities of the project using the livelink you have to register at least two accounts first.]
 
 This is a simple web based chatting application for Computer and Cyber Security course to demonstrate some ciphering algorithms.
 In this project, We can register new users using gmail and password, login providing gmail address and password. Then in the home page, it shows all the registered users.
