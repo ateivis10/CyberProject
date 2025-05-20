@@ -6,7 +6,7 @@ to Js with the same functionalities. To see the functionalities of the project u
 
 This is a simple web based chatting application for Computer and Cyber Security course to demonstrate some ciphering algorithms.
 In this project, We can register new users using gmail and password, login providing gmail address and password. Then in the home page, it shows all the registered users.
-We have select a user to start a conversation. Then we can send messages to different users. The messages are stored and displayed from a database table.
+We have to select a user to start a conversation. Then we can send messages to different users. The messages are stored and displayed from a database table.
 
 The main feature of this project is, we can send secret messages using different encryption/decryption algorithms. 
 In this project I have used two cipher techniques namely- Autokey and Playfair cipher. The user can send secret messages by clicking on the secret message checkbox.
